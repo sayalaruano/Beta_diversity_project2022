@@ -37,10 +37,10 @@ calc_zscore <- function(file_to_read,file_elevation,spr.t.f,method.null,
     ba_spread <- merge(ba_spread,elev,by=c('Plot'))
     
     # Add plot names as indices
-    row.names(ba_spread)<-ba_spread$Elevation
+    row.names(ba_spread) <- ba_spread$Elevation
     
     # Delete plot and elevation columns
-    ba_spread<- ba_spread[,!colnames(ba_spread) %in% c('Plot','Elevation')]
+    ba_spread <- ba_spread[,!colnames(ba_spread) %in% c('Plot','Elevation')]
     
     # Order the dataframe by row names (elevation)
     ba_spread <- ba_spread[order(as.numeric(row.names(ba_spread))),]
@@ -159,8 +159,8 @@ calc_zscore <- function(file_to_read,file_elevation,spr.t.f,method.null,
     zsds1000 <- zsd/sdsd1
     
     # Create a list with the results
-    lexit<- list(obs_whitaker = list_index[[1]], obs_diss = ldist[[1]], mean_null_whitaker = v, mean_null_diss = dd,
-                 zscore_whitaker =zscsws500, zscore_diss =  zsds1000, ci_low_whitaker = ci2, ci_high_whitaker = ci1,
+    lexit <- list(obs_whitaker = list_index[[1]], obs_diss = ldist[[1]], mean_null_whitaker = v, mean_null_diss = dd,
+                 zscore_whitaker = zscsws500, zscore_diss =  zsds1000, ci_low_whitaker = ci2, ci_high_whitaker = ci1,
                  ci_low_diss = cid2, ci_high_diss = cid1)
     
     return (lexit)

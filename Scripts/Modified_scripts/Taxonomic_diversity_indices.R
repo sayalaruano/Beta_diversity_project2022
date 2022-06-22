@@ -143,3 +143,9 @@ Srar <- as.data.frame(rarefy(ad_ab_freqmat, min(rowSums(ad_ab_freqmat))))
 Srar$Plot <- rownames(Srar)
 rownames(Srar) <- NULL
 names(Srar)[1] = "Riqueza"
+
+#######################################################
+################ NMDS ANALYSIS ########################
+#######################################################
+
+

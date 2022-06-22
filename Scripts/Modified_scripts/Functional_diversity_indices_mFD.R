@@ -229,7 +229,7 @@ beta_div_fric <- beta_fd_indices_traits$"details"$"asb_FRic"
 
 # Obtain a list of vectors containing names of species being vertices of the 
 # convex hull for each assemblage retrieved through the details_beta list
-beta_div_scient_names <- beta_div_beta_fd_indices_traits$"details"$"asb_vertices"
+beta_div_scient_names <- beta_fd_indices_traits$"details"$"asb_vertices"
 
 # Create a plot of the beta functional indices for 2 assemblages
 # in a multidimensional space 
