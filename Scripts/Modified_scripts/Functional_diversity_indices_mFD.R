@@ -54,7 +54,7 @@ traits_summ <- mFD::sp.tr.summary(
   sp_tr      = df_traits, 
   stop_if_NA = FALSE)
 
-# Summary of the plot by species dataframe:
+# Summary of the plot by species dataframe
 asb_sp_traits_summ <- mFD::asb.sp.summary(asb_sp_w = sp_BA_plot)
 asb_sp_traits_occ <- asb_sp_traits_summ$"asb_sp_occ"
 
@@ -76,6 +76,8 @@ fspaces_quality_traits <- mFD::quality.fspaces(
   deviation_weighting = "absolute",
   fdist_scaling       = FALSE,
   fdendro             = "average")
+
+df_fspaces_quality_traits <- fspaces_quality_traits$quality_fspaces
 
 # Show the quality metrics of space a data frame gathering for each space 
 # (in rows), values of quality metric(s) (in columns) 
@@ -106,6 +108,8 @@ Traits_faxes <- mFD::traits.faxes.cor(
   sp_tr          = df_traits, 
   sp_faxes_coord = sp_faxes_coord_traits[ , c("PC1", "PC2", "PC3")], 
   plot           = TRUE)
+
+df_corr_traits_axes <- Traits_faxes$tr_faxes_stat
 
 # Store traits with significant effect
 signif_traits <- Traits_faxes$"tr_faxes_stat"[which(Traits_faxes$"tr_faxes_stat"$"p.value" < 0.05), ]
@@ -153,7 +157,7 @@ alpha_fd_indices_traits <- mFD::alpha.fd.multidim(
   check_input      = TRUE,
   details_returned = TRUE)
 
-fd_ind_values_traits <- alpha_fd_indices_traits$"functional_diversity_indices"
+df_fd_ind_values_traits <- alpha_fd_indices_traits$"functional_diversity_indices"
 
 details_list_traits <- alpha_fd_indices_traits$"details"
 
@@ -187,6 +191,8 @@ plots_alpha <- mFD::alpha.multidim.plot(
 # Visualize plots
 plots_alpha$"fric"$"patchwork"
 plots_alpha$"fdis"$"patchwork"
+plots_alpha$"feve"$"patchwork"
+plots_alpha$"fdiv"$"patchwork"
 
 # Generalization of Hill numbers for alpha functional diversity
 Traits_gower <- mFD::funct.dist(
@@ -204,6 +210,8 @@ traits_FD2mean <- mFD::alpha.fd.hill(
   tau      = "mean", 
   q        = 1)
 
+df_fd_ind_values_traits["Hill_numbers"] <- traits_FD2mean$asb_FD_Hill
+
 #######################################################
 ########### BETA DIVERSITY ############################
 #######################################################
@@ -216,8 +224,8 @@ beta_fd_indices_traits <- mFD::beta.fd.multidim(
   beta_family      = c("Sorensen"),
   details_returned = TRUE)
 
-# Obtain beta div indices values for each pair of assemblages
-beta_div_pairs <- beta_fd_indices_traits$"pairasb_fbd_indices"
+# Obtain beta div indices values for each pair of assemblages as dataframe
+df_beta_div_indices <- dist.to.df(beta_fd_indices_traits$pairasb_fbd_indices)
 
 # Obtain a list containing details such as inputs, vertices of the global 
 # pool and of each assemblage and FRic values for each assemblage
@@ -225,7 +233,8 @@ beta_div_details <- beta_fd_indices_traits$"details"
 
 # Obtain a vector containing the FRic value for each assemblage 
 # retrieved through the details_beta list
-beta_div_fric <- beta_fd_indices_traits$"details"$"asb_FRic"
+beta_div_fric <- as_data_frame(beta_fd_indices_traits$"details"$"asb_FRic")
+colnames(beta_div_fric) <- "FRic_beta_div"
 
 # Obtain a list of vectors containing names of species being vertices of the 
 # convex hull for each assemblage retrieved through the details_beta list
@@ -257,3 +266,29 @@ beta_plot_traits <- mFD::beta.multidim.plot(
 
 # Visualize plots
 beta_plot_traits$"patchwork"
+
+#######################################################
+############ EXPORT TABULAR DATA ######################
+#######################################################
+
+# Create a list with the results
+results <- list(funct_spaces_quality = df_fspaces_quality_traits, 
+              corr_traits_axes = df_corr_traits_axes, 
+              alpha_div_indices =  df_fd_ind_values_traits,
+              beta_div_indices = df_beta_div_indices, 
+              beta_div_frich = beta_div_fric)
+
+# Create a folder to store the results. You should replace the name of the new 
+# folder_path to store the results
+newfolder_path <- "Outputs/Functional_diversity_analysis/"
+dir.create(newfolder_path)
+
+# Export the results as csv files
+for (j in 1:length(results)){
+  # Replace the name of the 
+  write.csv(results[[j]],paste0(newfolder_path, "/", names(results)[j],'.csv'))
+  
+}
+
+
+

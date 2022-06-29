@@ -1,0 +1,10 @@
+"","trait","axis","test","stat","value","p.value"
+"1","Ht2019","PC1","Linear Model","r2",0.666,0
+"2","Ht2019","PC2","Linear Model","r2",0.333,0
+"3","Ht2019","PC3","Linear Model","r2",0.001,0.592
+"4","LA","PC1","Linear Model","r2",0.019,0.016
+"5","LA","PC2","Linear Model","r2",0.002,0.4407
+"6","LA","PC3","Linear Model","r2",0.98,0
+"7","SLA","PC1","Linear Model","r2",0.405,0
+"8","SLA","PC2","Linear Model","r2",0.595,0
+"9","SLA","PC3","Linear Model","r2",0,0.8575

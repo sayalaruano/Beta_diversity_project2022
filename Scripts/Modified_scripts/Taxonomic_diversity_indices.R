@@ -148,4 +148,34 @@ names(Srar)[1] = "Riqueza"
 ################ NMDS ANALYSIS ########################
 #######################################################
 
+# Calculate the Nonmetric Multidimensional Scaling (NMDS) of the frequency 
+# matrix to simplify multivariate data into a few important axes
+nmds1 <- metaMDS(ad_ab_freqmat, distance = "bray", k = 2)
 
+# Plot the resulting NMDS
+plot(nmds1)
+
+# Calculate distance matrix without species - coosidering plots
+ad_ab_freqmat2 <- vegdist(ad_ab_freqmat, method = "bray")
+
+# Convert vegan object into a matrix
+ad_ab_freqmat2 <- as.matrix(ad_ab_freqmat2, labels = T)
+
+# Calculate NMDS
+nmds2 <- metaMDS(ad_ab_freqmat2, distance = "bray", k = 2, maxit = 999, trymax = 500,
+                wascores = TRUE)
+
+# Plot the resulting NMDS
+plot(nmds2)
+
+# Create lists for different treatments
+treat = c(rep("Treatment1", 4), rep("Treatment2", 4), rep("Treatment3", 4), rep("Treatment4", 4))
+
+# Label nmds points by sites
+orditorp(nmds, display = "sites", )
+
+# Create ellipses considering the treatments
+ordiellipse(nmds, groups = treat, draw = "polygon", col = "grey90", label = F)
+
+# Extract NMDS scores (x and y coordinates) and put them into a dataframe
+nmds_scores = as_data_frame(scores(nmds1$species))

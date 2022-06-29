@@ -10,7 +10,9 @@ library(Hmisc)
 df_traits_orig <- read.csv("Data/20210811_MeanTraits.csv")
 
 # Select traits for the analysis
-df_traits <- df_traits_orig[c("Mean.LA", "Mean.SLA", "Mean.N.por", "Mean.P.por")]
+df_traits <- df_traits_orig[c("WD", "Ht2019", "Sum_BA_2019.m2.",
+                              "Mean.LA", "Mean.SLA", 
+                              "Mean.LBT", "Mean.LDMC")]
 
 # Run correlation analysis 
 corr_analysis <-rcorr(as.matrix(df_traits), type = "spearman")
@@ -63,8 +65,8 @@ corr_traits2 <- ggcorrm(data = df_traits) +
 # Export plot figure
 ggsave(filename = "Outputs/Correlation_traits/correlation_traits_plot2.svg",
        plot = corr_traits2, 
-       width = 6.61,
-       height = 4.18,
+       width = 10,
+       height = 8,
        units = "in")
 
 # Export correlation matrices
