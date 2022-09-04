@@ -96,14 +96,21 @@ ad_ba_hill_rs <- as.data.frame(ad_ba_hill_rs)
 colnames(ad_ba_hill_rs) <- c("Hill_Diversity")
 
 # Add elevation column 
-ad_ba_hill_rs <- merge(ad_ba_hill_rs, elev, by = "row.names")
+ad_ba_hill_rs <- merge(elev, ad_ba_hill_rs, by = "row.names")
+
+# Add plot names as indices and delete column with names
+row.names(ad_ba_hill_rs) <- ad_ba_hill_rs$Row.names
+ad_ba_hill_rs[1] <- NULL
 
 #######################################################
 ################ BETA DIVERSITY ######################
 #######################################################
 
 bd_ba_rs <- betadiver(ad_ba_sum_rsmat, "w")
-bd_ba_rs <- as.data.frame(bd_ba_rs)
+bd_ba_rs <- as.data.frame(as.matrix(bd_ba_rs))
+
+# Save beta diversity matrix
+write.csv(bd_ba_rs,"Data/Beta_tax_div_ba_rs_matrix.csv", row.names = TRUE)
 
 #######################################################
 ################ RAREFACTION ##########################
@@ -112,11 +119,19 @@ bd_ba_rs <- as.data.frame(bd_ba_rs)
 raref <- as.data.frame(rarefy(ad_ab_freqmat, min(rowSums(ad_ab_freqmat))))
 colnames(raref) <- c("Rarefaction")
 
+# Add rarefaction column with previous dataset
+final_df <- merge(ad_ba_hill_rs, raref, by = "row.names")
+
+# Add plot names as indices and delete column with names
+row.names(final_df) <- final_df$Row.names
+final_df[1] <- NULL
+
+# Create and save figure of a rarefaction curve
 rarefcurve_ba <- specaccum(ad_ba_sum_rsmat)
-
+png(file="Outputs/Taxonomic_diversity/rarefaction_curve.png", 
+    width=700, height=350)
 plot(rarefcurve_ba)
-
-S <- as.data.frame(specnumber(ad_ab_freqmat))
+dev.off()
 
 #######################################################
 ################ EVENESS ##############################
@@ -129,20 +144,51 @@ H <- diversity(ad_ba_sum_rsmat)
 evenness <- as.data.frame(H/log(specnumber(ad_ba_sum_rsmat)))
 colnames(evenness) <- c("Evenness")
 
+# Add eveness column with previous dataset
+final_df <- merge(final_df, evenness, by = "row.names")
+
+# Add plot names as indices and delete column with names
+row.names(final_df) <- final_df$Row.names
+final_df[1] <- NULL
+
 #######################################################
 ################ CHAO1 ################################
 #######################################################
-chao1 <- as.data.frame(estimateR(ad_ab_freqmat))
+chao1 <- as.data.frame(t(estimateR(ad_ab_freqmat)))
+
+chao1 <- subset(chao1, select = c("S.chao1", "se.chao1"))
+colnames(chao1) <- c("Chao1", "SE_Chao1")
+
+# Add chao1 column with previous dataset
+final_df <- merge(final_df, chao1, by = "row.names")
+
+# Add plot names as indices and delete column with names
+row.names(final_df) <- final_df$Row.names
+final_df[1] <- NULL
 
 #######################################################
 ################ RICHNESS #############################
 #######################################################
 
+richness <- as.data.frame(specnumber(ad_ab_freqmat))
+colnames(richness) <- c("Richness")
+
+# Add richness column with previous dataset
+final_df <- merge(final_df, richness, by = "row.names")
+
+# Add plot names as indices and delete column with names
+row.names(final_df) <- final_df$Row.names
+final_df[1] <- NULL
+
 # Express richness with rarefaction
 Srar <- as.data.frame(rarefy(ad_ab_freqmat, min(rowSums(ad_ab_freqmat))))
 Srar$Plot <- rownames(Srar)
-rownames(Srar) <- NULL
-names(Srar)[1] = "Riqueza"
+
+#######################################################
+############ EXPORT TABULAR DATA ######################
+#######################################################
+
+write.csv(final_df,"Outputs/Taxonomic_diversity/Taxon_div_indices.csv", row.names = TRUE)
 
 #######################################################
 ################ NMDS ANALYSIS ########################
@@ -152,10 +198,24 @@ names(Srar)[1] = "Riqueza"
 # matrix to simplify multivariate data into a few important axes
 nmds1 <- metaMDS(ad_ab_freqmat, distance = "bray", k = 2)
 
-# Plot the resulting NMDS
-plot(nmds1)
+# Create dataset of NMDS from plots
+nmds_plots = as.data.frame(nmds1$points)
 
-# Calculate distance matrix without species - coosidering plots
+# Create plot
+nmds_sp <- ggscatter(as.data.frame(nmds1$species), x = "MDS1", y = "MDS2",
+          color = "black", shape = 20, size = 3)+
+          ylab("NMDS2")+
+          xlab("NMDS1")+
+          geom_point(data=nmds_plots, color="#AD1010")
+
+# Export final plot
+ggsave(filename = "Outputs/Taxonomic_diversity/nmds_species.png",
+       plot = nmds_sp, 
+       width = 12,
+       height = 8,
+       units = "in")
+
+# Calculate distance matrix without species - considering plots
 ad_ab_freqmat2 <- vegdist(ad_ab_freqmat, method = "bray")
 
 # Convert vegan object into a matrix
@@ -165,17 +225,24 @@ ad_ab_freqmat2 <- as.matrix(ad_ab_freqmat2, labels = T)
 nmds2 <- metaMDS(ad_ab_freqmat2, distance = "bray", k = 2, maxit = 999, trymax = 500,
                 wascores = TRUE)
 
-# Plot the resulting NMDS
-plot(nmds2)
+# Create dataset of NMDS from plots
+nmds2_plots = as.data.frame(nmds2$points)
 
-# Create lists for different treatments
-treat = c(rep("Treatment1", 4), rep("Treatment2", 4), rep("Treatment3", 4), rep("Treatment4", 4))
+# Add elevation column 
+nmds2_plots = merge(nmds2_plots, elev, by = "row.names")
 
-# Label nmds points by sites
-orditorp(nmds, display = "sites", )
+colnames(nmds2_plots) = c("Plot", "NMDS1", "NMDS2", "Elevation")
 
-# Create ellipses considering the treatments
-ordiellipse(nmds, groups = treat, draw = "polygon", col = "grey90", label = F)
+# Create plot
+nmds_plot <- ggscatter(nmds2_plots, x = "NMDS1", y = "NMDS2",
+                     color = "Elevation", shape = 20, size = 3, 
+                     label = "Plot")+
+            theme(legend.position="right")+
+            scale_color_gradient(low = "#A2DCEB", high = "#415E63")
 
-# Extract NMDS scores (x and y coordinates) and put them into a dataframe
-nmds_scores = as_data_frame(scores(nmds1$species))
+# Export final plot
+ggsave(filename = "Outputs/Taxonomic_diversity/nmds_plots.png",
+       plot = nmds_plot, 
+       width = 12,
+       height = 8,
+       units = "in")

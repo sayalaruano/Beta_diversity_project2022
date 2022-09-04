@@ -15,6 +15,7 @@ df_fd_alphadiv <- read.csv("Data/AlphFD_Indexvalues_270122.csv")
 #######################################################
 
 # Verify correlations between variables to select the best ones
+
 data_soil <- df_var[, c(14, 15, 17, 20)]
 corr_data_soil <- rcorr(as.matrix(data_soil))
 

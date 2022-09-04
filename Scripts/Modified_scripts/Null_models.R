@@ -9,7 +9,7 @@ library(boot)
 library(Rmisc)
 
 # Define a function to run the null models
-calc_zscore <- function(file_to_read,file_elevation,spr.t.f,method.null,
+null_models <- function(file_to_read,file_elevation,spr.t.f,method.null,
                         meth.diss,n.simulations,n.year){
   
     # Add a seed to obtain reproducible results. 
@@ -158,27 +158,103 @@ calc_zscore <- function(file_to_read,file_elevation,spr.t.f,method.null,
     zsd <- as.matrix(dist.o) - dd
     zsds1000 <- zsd/sdsd1
     
+    # Create a summary table
+    # Create a dataframe with elevation ranges
+    elev_change <- c('632-653', '653-827', '827-1018', '1018-1277', '1277-1640', 
+                     '1640-1829', '1829-1879', '1879-2203', '2203-2212', '2212-2313', 
+                     '2313-2492', '2492-2932', '2932-3109', '3109-3421', '3421-3507')
+    
+    df_null_models <- data.frame(elev_change, stringsAsFactors = TRUE)
+    
+    # Obtain data from the observed values and put it into the previous dataframe
+    obs_val <- c()
+    idx1 <- 1
+    idx2 <- 2
+    
+    for(i in 1:length(df_null_models$elev_change)){
+      obs_val <- c(obs_val, ldist[[1]][idx1,idx2])
+      idx1 <- idx1 + 1
+      idx2 <- idx2 + 1
+    }
+    
+    df_null_models$'Observed_values' <- obs_val
+    
+    # Obtain data from the null values and put it into the previous dataframe
+    null_val <- c()
+    idx3 <- 1
+    idx4 <- 2
+    
+    for(i in 1:length(df_null_models$elev_change)){
+      null_val <- c(null_val, dd[idx3,idx4])
+      idx3 <- idx3 + 1
+      idx4 <- idx4 + 1
+    }
+    
+    df_null_models$'Null_values' <- null_val
+    
+    # Obtain data from the z-scores values and put it into the previous dataframe
+    z_val <- c()
+    idx5 <- 1
+    idx6 <- 2
+    
+    for(i in 1:length(df_null_models$elev_change)){
+      z_val <- c(z_val, zsds1000[idx5,idx6])
+      idx5 <- idx5 + 1
+      idx6 <- idx6 + 1
+    }
+    
+    df_null_models$'Z_score' <- z_val
+    
+    # Obtain data from the low ci values and put it into the previous dataframe
+    ci_low <- c()
+    idx7 <- 1
+    idx8 <- 2
+    
+    for(i in 1:length(df_null_models$elev_change)){
+      ci_low <- c(ci_low, cid2[idx7,idx8])
+      idx7 <- idx7 + 1
+      idx8 <- idx8 + 1
+    }
+    
+    df_null_models$'CI_low' <- ci_low
+    
+    # Obtain data from the high ci values and put it into the previous dataframe
+    ci_high <- c()
+    idx9 <- 1
+    idx10 <- 2
+    
+    for(i in 1:length(df_null_models$elev_change)){
+      ci_high <- c(ci_high, cid1[idx9,idx10])
+      idx9 <- idx9 + 1
+      idx10 <- idx10 + 1
+    }
+    
+    df_null_models$'CI_high' <- ci_high
+    
+    # Add plot names as indices and delete column with names
+    row.names(df_null_models) <- df_null_models$elev_change
+    df_null_models[1] <- NULL
+    
     # Create a list with the results
     lexit <- list(obs_whitaker = list_index[[1]], obs_diss = ldist[[1]], mean_null_whitaker = v, mean_null_diss = dd,
                  zscore_whitaker = zscsws500, zscore_diss =  zsds1000, ci_low_whitaker = ci2, ci_high_whitaker = ci1,
-                 ci_low_diss = cid2, ci_high_diss = cid1)
+                 ci_low_diss = cid2, ci_high_diss = cid1, summary = df_null_models)
     
     return (lexit)
 }
 
 # Run the function with a dataset (replace the name of the file in the 
 # file_to_read argument)
-results <- calc_zscore(file_to_read = 'Data/17082021_BaseModelosNulos_BasalArea.csv', file_elevation = 'Data/Altitudes_13052021.csv', spr.t.f = FALSE,
+results <- null_models(file_to_read = 'Data/Null_models/17082021_BaseModelosNulos_Gen_BasalArea_agrupados.csv', file_elevation = 'Data/Altitudes_13052021.csv', spr.t.f = FALSE,
                     method.null = 'c0_both', meth.diss = 'bray',n.simulations = 1000, n.year = NA)
 
 # Create a folder to store the results. You should replace the name of the new 
 # folder_path to store the results
-newfolder_path <- "Outputs/Null_models/Species_Bray"
+newfolder_path <- "Outputs/Null_models/Genre_BA_Bray"
 dir.create(newfolder_path)
 
-# Export the results as csv files
+# Export the raw results and summary table as csv files
 for (j in 1:length(results)){
   # Replace the name of the 
-  write.csv(results[[j]],paste0(newfolder_path, "/", names(results)[j],'_species_bray.csv'))
-  
+  write.csv(results[[j]],paste0(newfolder_path, "/", names(results)[j],'_genre_ba_bray.csv'))
 }

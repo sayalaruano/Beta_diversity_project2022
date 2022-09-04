@@ -8,6 +8,7 @@
 library(mFD)
 library(reshape2)
 library(dplyr)
+library(ggplot2)
 
 # Add a seed to obtain reproducible results. 
 # If you want the results to vary, turn off set.seed()
@@ -101,6 +102,12 @@ funct_sp_q_plot <- mFD::quality.fspaces.plot(
   gradient_deviation_quality = c(low = "yellow", high = "red"),
   x_lab                      = "Trait-based distance")
 
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Functional_spaces/Funct_spaces_quality.png",
+       plot = funct_sp_q_plot, 
+       width = 10,
+       height = 8,
+       units = "in")
+
 # Test correlation between functional axes and traits
 sp_faxes_coord_traits <- fspaces_quality_traits$"details_fspaces"$"sp_pc_coord"
 
@@ -142,7 +149,14 @@ big_plot <- mFD::funct.space.plot(
   check_input     = TRUE)
 
 # Visualize the graph with all pairs of axes
-big_plot$patchwork
+plot_funct_space = big_plot$patchwork
+
+# Save the figure
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Functional_spaces/Funct_spaces.png",
+       plot = plot_funct_space, 
+       width = 10,
+       height = 8,
+       units = "in")
 
 #######################################################
 ########### ALPHA DIVERSITY ###########################
@@ -161,9 +175,9 @@ df_fd_ind_values_traits <- alpha_fd_indices_traits$"functional_diversity_indices
 
 details_list_traits <- alpha_fd_indices_traits$"details"
 
-# Create a plot of the alpha functional indices for 2 assemblages (the highest 
-# and lowest plots by elevation) in a multidimensional space 
-plots_alpha <- mFD::alpha.multidim.plot(
+# Create a plot of the alpha functional indices for the highest 
+# and lowest plots by elevation in a multidimensional space 
+plots_alpha_maxmin <- mFD::alpha.multidim.plot(
   output_alpha_fd_multidim = alpha_fd_indices_traits,
   plot_asb_nm              = c("MAPI_02", "YANA_01"),
   ind_nm                   = c("fdis", "feve", "fric", "fdiv"),
@@ -173,12 +187,12 @@ plots_alpha <- mFD::alpha.multidim.plot(
   color_bg                 = "grey95",
   shape_sp                 = c(pool = 3, asb1 = 21, asb2 = 21),
   size_sp                  = c(pool = 0.7, asb1 = 1, asb2 = 1),
-  color_sp                 = c(pool = NA, asb1 = "#1F968BFF", asb2 = "#DCE319FF"),
-  color_vert               = c(pool = NA, asb1 = "#1F968BFF", asb2 = "#DCE319FF"),
-  fill_sp                  = c(pool = NA, asb1 = "#1F968BFF", asb2 = "#DCE319FF"),
-  fill_vert                = c(pool = NA, asb1 = "#1F968BFF", asb2 = "#DCE319FF"),
-  color_ch                 = c(pool = NA, asb1 = "#1F968BFF", asb2 = "#DCE319FF"),
-  fill_ch                  = c(pool = "white", asb1 = "#1F968BFF", asb2 = "#DCE319FF"),
+  color_sp                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  color_vert               = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_sp                  = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_vert                = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  color_ch                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_ch                  = c(pool = "white", asb1 = "#7FAEB8", asb2 = "#AD1010"),
   alpha_ch                 = c(pool = 1, asb1 = 0.3, asb2 = 0.3),
   shape_centroid_fdis      = c(asb1 = 22,  asb2 = 24),
   size_sp_nm               = 3, 
@@ -188,11 +202,159 @@ plots_alpha <- mFD::alpha.multidim.plot(
   save_file                = FALSE,
   check_input              = TRUE) 
 
-# Visualize plots
-plots_alpha$"fric"$"patchwork"
-plots_alpha$"fdis"$"patchwork"
-plots_alpha$"feve"$"patchwork"
-plots_alpha$"fdiv"$"patchwork"
+# Create and store plots
+fric_plots_alpha_maxmin = plots_alpha_maxmin$"fric"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/fric_plots_alpha_maxmin.png",
+       plot = fric_plots_alpha_maxmin, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+fdis_plots_alpha_maxmin = plots_alpha_maxmin$"fdis"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/fdis_plots_alpha_maxmin.png",
+       plot = fdis_plots_alpha_maxmin, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+feve_plots_alpha_maxmin = plots_alpha_maxmin$"feve"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/feve_plots_alpha_maxmin.png",
+       plot = feve_plots_alpha_maxmin, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+fdiv_plots_alpha_maxmin = plots_alpha_maxmin$"fdiv"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/fdiv_plots_alpha_maxmin.png",
+       plot = fdiv_plots_alpha_maxmin, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+# Create a plot of the alpha functional indices for the highest 
+# and intermediate plots by elevation in a multidimensional space 
+
+plots_alpha_maxint <- mFD::alpha.multidim.plot(
+  output_alpha_fd_multidim = alpha_fd_indices_traits,
+  plot_asb_nm              = c("YANA_01", "INTI_01"),
+  ind_nm                   = c("fdis", "feve", "fric", "fdiv"),
+  faxes                    = NULL,
+  faxes_nm                 = NULL,
+  range_faxes              = c(NA, NA),
+  color_bg                 = "grey95",
+  shape_sp                 = c(pool = 3, asb1 = 21, asb2 = 21),
+  size_sp                  = c(pool = 0.7, asb1 = 1, asb2 = 1),
+  color_sp                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  color_vert               = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_sp                  = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_vert                = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  color_ch                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_ch                  = c(pool = "white", asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  alpha_ch                 = c(pool = 1, asb1 = 0.3, asb2 = 0.3),
+  shape_centroid_fdis      = c(asb1 = 22,  asb2 = 24),
+  size_sp_nm               = 3, 
+  color_sp_nm              = "black",
+  plot_sp_nm               = NULL,
+  fontface_sp_nm           = "plain",
+  save_file                = FALSE,
+  check_input              = TRUE) 
+
+# Create and store plots
+fric_plots_alpha_maxint = plots_alpha_maxint$"fric"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Alpha_div/fric_plots_alpha_maxint.png",
+       plot = fric_plots_alpha_maxint, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+fdis_plots_alpha_maxmint = plots_alpha_maxint$"fdis"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Alpha_div/fdis_plots_alpha_maxmint.png",
+       plot = fdis_plots_alpha_maxmint, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+feve_plots_alpha_maxint = plots_alpha_maxint$"feve"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Alpha_div/feve_plots_alpha_maxint.png",
+       plot = feve_plots_alpha_maxint, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+fdiv_plots_alpha_maxint = plots_alpha_maxint$"fdiv"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Alpha_div/fdiv_plots_alpha_maxint.png",
+       plot = fdiv_plots_alpha_maxint, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+# Create a plot of the alpha functional indices for the lowest 
+# and intermediate plots by elevation in a multidimensional space
+plots_alpha_minint <- mFD::alpha.multidim.plot(
+  output_alpha_fd_multidim = alpha_fd_indices_traits,
+  plot_asb_nm              = c("MAPI_02", "INTI_01"),
+  ind_nm                   = c("fdis", "feve", "fric", "fdiv"),
+  faxes                    = NULL,
+  faxes_nm                 = NULL,
+  range_faxes              = c(NA, NA),
+  color_bg                 = "grey95",
+  shape_sp                 = c(pool = 3, asb1 = 21, asb2 = 21),
+  size_sp                  = c(pool = 0.7, asb1 = 1, asb2 = 1),
+  color_sp                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  color_vert               = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_sp                  = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_vert                = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  color_ch                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_ch                  = c(pool = "white", asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  alpha_ch                 = c(pool = 1, asb1 = 0.3, asb2 = 0.3),
+  shape_centroid_fdis      = c(asb1 = 22,  asb2 = 24),
+  size_sp_nm               = 3, 
+  color_sp_nm              = "black",
+  plot_sp_nm               = NULL,
+  fontface_sp_nm           = "plain",
+  save_file                = FALSE,
+  check_input              = TRUE) 
+
+# Create and store plots
+fric_plots_alpha_minint = plots_alpha_minint$"fric"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Alpha_div/fric_plots_alpha_minint.png",
+       plot = fric_plots_alpha_minint, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+fdis_plots_alpha_minint = plots_alpha_minint$"fdis"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Alpha_div/fdis_plots_alpha_minint.png",
+       plot = fdis_plots_alpha_minint, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+feve_plots_alpha_minint = plots_alpha_minint$"feve"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Alpha_div/feve_plots_alpha_minint.png",
+       plot = feve_plots_alpha_minint, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+fdiv_plots_alpha_minint = plots_alpha_minint$"fdiv"$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Alpha_div/fdiv_plots_alpha_minint.png",
+       plot = fdiv_plots_alpha_minint, 
+       width = 10,
+       height = 8,
+       units = "in")
 
 # Generalization of Hill numbers for alpha functional diversity
 Traits_gower <- mFD::funct.dist(
@@ -240,11 +402,11 @@ colnames(beta_div_fric) <- "FRic_beta_div"
 # convex hull for each assemblage retrieved through the details_beta list
 beta_div_scient_names <- beta_fd_indices_traits$"details"$"asb_vertices"
 
-# Create a plot of the beta functional indices for 2 assemblages
+# Create a plot of the beta functional indices for the highest and lowest plots
 # in a multidimensional space 
-beta_plot_traits <- mFD::beta.multidim.plot(
+beta_traits_maxmin <- mFD::beta.multidim.plot(
   output_beta_fd_multidim = beta_fd_indices_traits,
-  plot_asb_nm             = c("CEDR_01", "RIBR_01"),
+  plot_asb_nm             = c("MAPI_02", "YANA_01"),
   beta_family             = c("Sorensen"),
   faxes                   = paste0("PC", 1:3),
   name_file               = NULL,
@@ -253,19 +415,91 @@ beta_plot_traits <- mFD::beta.multidim.plot(
   color_bg                = "grey95",
   shape_sp                = c("pool" = 3.0, asb1 = 22, asb2 = 21),
   size_sp                 = c("pool" = 0.8, asb1 =  1, asb2 =  1),
-  color_sp                = c("pool" = "grey50", asb1 = "blue", asb2 = "red"),
-  fill_sp                 = c("pool" = NA, asb1 = "white", asb2 = "white"),
-  fill_vert               = c("pool" = NA, asb1 = "blue", asb2 = "red"),
-  color_ch                = c("pool" = NA, asb1 = "blue", asb2 = "red"),
-  fill_ch                 = c("pool" = "white", asb1 = "blue", asb2 = "red"),
+  color_sp                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_sp                  = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_vert                = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  color_ch                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_ch                  = c(pool = "white", asb1 = "#7FAEB8", asb2 = "#AD1010"),
   alpha_ch                = c("pool" = 1, asb1 = 0.3, asb2 = 0.3),
   nm_size                 = 3,
   nm_color                = "black",
   nm_fontface             = "plain",
   check_input             = TRUE)
 
-# Visualize plots
-beta_plot_traits$"patchwork"
+# Create and store plot
+beta_plot_traits_maxmin = beta_traits_maxmin$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Beta_div/beta_plot_traits_maxmin.png",
+       plot = beta_plot_traits_maxmin, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+# Create a plot of the beta functional indices for the highest and intermediate plots
+# in a multidimensional space 
+beta_traits_maxint <- mFD::beta.multidim.plot(
+  output_beta_fd_multidim = beta_fd_indices_traits,
+  plot_asb_nm             = c("INTI_01", "YANA_01"),
+  beta_family             = c("Sorensen"),
+  faxes                   = paste0("PC", 1:3),
+  name_file               = NULL,
+  faxes_nm                = NULL,
+  range_faxes             = c(NA, NA),
+  color_bg                = "grey95",
+  shape_sp                = c("pool" = 3.0, asb1 = 22, asb2 = 21),
+  size_sp                 = c("pool" = 0.8, asb1 =  1, asb2 =  1),
+  color_sp                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_sp                  = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_vert                = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  color_ch                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_ch                  = c(pool = "white", asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  alpha_ch                = c("pool" = 1, asb1 = 0.3, asb2 = 0.3),
+  nm_size                 = 3,
+  nm_color                = "black",
+  nm_fontface             = "plain",
+  check_input             = TRUE)
+
+# Create and store plot
+beta_plot_traits_maxint = beta_traits_maxint$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Beta_div/beta_plot_traits_maxint.png",
+       plot = beta_plot_traits_maxint, 
+       width = 10,
+       height = 8,
+       units = "in")
+
+# Create a plot of the beta functional indices for the lowest and intermediate plots
+# in a multidimensional space 
+beta_traits_minint <- mFD::beta.multidim.plot(
+  output_beta_fd_multidim = beta_fd_indices_traits,
+  plot_asb_nm             = c("INTI_01", "MAPI_02"),
+  beta_family             = c("Sorensen"),
+  faxes                   = paste0("PC", 1:3),
+  name_file               = NULL,
+  faxes_nm                = NULL,
+  range_faxes             = c(NA, NA),
+  color_bg                = "grey95",
+  shape_sp                = c("pool" = 3.0, asb1 = 22, asb2 = 21),
+  size_sp                 = c("pool" = 0.8, asb1 =  1, asb2 =  1),
+  color_sp                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_sp                  = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_vert                = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  color_ch                 = c(pool = NA, asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  fill_ch                  = c(pool = "white", asb1 = "#7FAEB8", asb2 = "#AD1010"),
+  alpha_ch                = c("pool" = 1, asb1 = 0.3, asb2 = 0.3),
+  nm_size                 = 3,
+  nm_color                = "black",
+  nm_fontface             = "plain",
+  check_input             = TRUE)
+
+# Create and store plot
+beta_plot_traits_minint = beta_traits_minint$"patchwork"
+
+ggsave(filename = "Outputs/Functional_diversity_analysis/Plots/Beta_div/beta_plot_traits_minint.png",
+       plot = beta_plot_traits_minint, 
+       width = 10,
+       height = 8,
+       units = "in")
 
 #######################################################
 ############ EXPORT TABULAR DATA ######################
@@ -280,8 +514,7 @@ results <- list(funct_spaces_quality = df_fspaces_quality_traits,
 
 # Create a folder to store the results. You should replace the name of the new 
 # folder_path to store the results
-newfolder_path <- "Outputs/Functional_diversity_analysis/"
-dir.create(newfolder_path)
+folder_path <- "Outputs/Functional_diversity_analysis/"
 
 # Export the results as csv files
 for (j in 1:length(results)){
@@ -289,6 +522,3 @@ for (j in 1:length(results)){
   write.csv(results[[j]],paste0(newfolder_path, "/", names(results)[j],'.csv'))
   
 }
-
-
-
