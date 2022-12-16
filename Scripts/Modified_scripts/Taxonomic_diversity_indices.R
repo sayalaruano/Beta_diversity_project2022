@@ -5,7 +5,8 @@ library(reshape2)
 library(hillR)
 library(dplyr)
 library(ggplot2)
-library(MBI)
+library(ggpubr)
+library(RColorBrewer)
 library(vegan)
 
 # Load data
@@ -102,12 +103,31 @@ ad_ba_hill_rs <- merge(elev, ad_ba_hill_rs, by = "row.names")
 row.names(ad_ba_hill_rs) <- ad_ba_hill_rs$Row.names
 ad_ba_hill_rs[1] <- NULL
 
+# Order by elevation 
+ad_ba_hill_rs <- ad_ba_hill_rs[order(ad_ba_hill_rs$Elevation),]
+
 #######################################################
 ################ BETA DIVERSITY ######################
 #######################################################
 
 bd_ba_rs <- betadiver(ad_ba_sum_rsmat, "w")
 bd_ba_rs <- as.data.frame(as.matrix(bd_ba_rs))
+
+# Add elevation column 
+bd_ba_rs <- merge(elev, bd_ba_rs, by = "row.names")
+
+# Add plot names as indices and delete column with names
+row.names(bd_ba_rs) <- bd_ba_rs$Row.names
+bd_ba_rs[1] <- NULL
+
+# Order by elevation 
+bd_ba_rs <- bd_ba_rs[order(bd_ba_rs$Elevation),]
+
+# Reorder columns by elevation
+bd_ba_rs <- bd_ba_rs[,c(1,11,10, 9, 8, 12, 13, 7, 6, 3, 5, 2, 4, 15, 16, 14, 17)]
+
+# Delete elevation column
+bd_ba_rs[1] <- NULL
 
 # Save beta diversity matrix
 write.csv(bd_ba_rs,"Data/Beta_tax_div_ba_rs_matrix.csv", row.names = TRUE)
@@ -126,12 +146,24 @@ final_df <- merge(ad_ba_hill_rs, raref, by = "row.names")
 row.names(final_df) <- final_df$Row.names
 final_df[1] <- NULL
 
-# Create and save figure of a rarefaction curve
+# Create a dataframe with raref information
 rarefcurve_ba <- specaccum(ad_ba_sum_rsmat)
-png(file="Outputs/Taxonomic_diversity/rarefaction_curve.png", 
-    width=700, height=350)
-plot(rarefcurve_ba)
-dev.off()
+df_raref = data.frame(rarefcurve_ba$sites, rarefcurve_ba$richness)
+colnames(df_raref) = c('sites', 'richness')
+
+# Create plot
+raref_plot <- ggscatter(as.data.frame(df_raref), x = "sites", y = "richness",
+                     color = "black", shape = 20, size = 2.5)+
+  ylab("Estimated richness")+
+  xlab("nplots")+
+  geom_line(size = 0.6)
+
+# Export final plot
+ggsave(filename = "Outputs/Taxonomic_diversity/rarefaction_curve.png",
+       plot = raref_plot, 
+       width = 12,
+       height = 8,
+       units = "in")
 
 #######################################################
 ################ EVENESS ##############################
@@ -234,11 +266,13 @@ nmds2_plots = merge(nmds2_plots, elev, by = "row.names")
 colnames(nmds2_plots) = c("Plot", "NMDS1", "NMDS2", "Elevation")
 
 # Create plot
+palette_yelbrown = brewer.pal(n = 9, name = "YlOrBr")
 nmds_plot <- ggscatter(nmds2_plots, x = "NMDS1", y = "NMDS2",
                      color = "Elevation", shape = 20, size = 3, 
                      label = "Plot")+
             theme(legend.position="right")+
-            scale_color_gradient(low = "#A2DCEB", high = "#415E63")
+            scale_colour_gradient2(low = "#662506", mid= "#CC4C02", high = "#FEE391")
+            #scale_color_distiller(palette = "YlOrBr")
 
 # Export final plot
 ggsave(filename = "Outputs/Taxonomic_diversity/nmds_plots.png",

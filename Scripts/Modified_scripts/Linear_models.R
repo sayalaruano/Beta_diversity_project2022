@@ -4,26 +4,46 @@
 library(Hmisc)
 library(nortest)
 library(MASS)
+library(corrmorant)
 library(glmulti) # this package requires rJava
 
 # Load data
-df_var <- read.csv("Data/20212704_MATRIZ_Thesis_final.csv")
+#df_var <- read.csv("Data/20212704_MATRIZ_Thesis_final.csv")
 df_fd_alphadiv <- read.csv("Data/AlphFD_Indexvalues_270122.csv")
+df_env_var <- read.csv("Data/Environmental_variables.csv")
 
 #######################################################
 ################ CORRELATION ANALYSIS #################
 #######################################################
 
-# Verify correlations between variables to select the best ones
+# Verify correlations between the selected variables
 
-data_soil <- df_var[, c(14, 15, 17, 20)]
-corr_data_soil <- rcorr(as.matrix(data_soil))
+# Select traits for the analysis
+df_select_var <- df_env_var[c("PCA1_temp", "C_N", "AGCp", "PC2.p")]
 
-data_prod <- df_var[, c(4, 5, 6, 7, 8, 9, 10, 21, 22, 23, 25)]
-corr_data_prod <- rcorr(as.matrix(data_prod))
+# Create correlation plot with corrmorant
+corr_plot_sel_var <- ggcorrm(data = df_select_var) +
+  theme_corrm(base_size = 6)+
+  theme(axis.text.x = element_text(angle = 90, size = 4.5), 
+        axis.text.y = element_text(size = 4.5),
+        legend.text = element_text(size = 4.5),
+        legend.title = element_text(size = 6)) +
+  lotri(geom_point(alpha = 0.5)) + 
+  lotri(geom_smooth(colour = "red4")) +
+  utri_heatmap(alpha = 0.5, corr_method = "spearman") +
+  utri_corrtext(corr_method = "spearman", size = 4) +
+  dia_histogram(lower = 0.1, fill = "grey80", color = 1)+
+  dia_density(lower = 0.1, alpha = .1, colour = "red4") +
+  scale_fill_gradient2(low = "white", mid = "red3", high ="red4", 
+                       midpoint = 0.5, space = "rgb", guide = guide_colorbar(title = "Correlation coefficient"),
+                       limits = c(0,1))
 
-data_climate = df_var[, c(33, 34, 38, 39, 40, 41, 42, 43, 44, 45)]
-corr_data_climate <- rcorr(as.matrix(data_climate))
+# Export plot figure
+ggsave(filename = "Outputs/Correlation_traits/Plots/corr_plot_selectec_var.png",
+       plot = corr_plot_sel_var, 
+       width = 7,
+       height = 5,
+       units = "in")
 
 #######################################################
 ################ LINEAR REGRESSIONS  ##################
@@ -33,9 +53,9 @@ corr_data_climate <- rcorr(as.matrix(data_climate))
 ############## MODEL 1: EVENNESS ######################
 #######################################################
 
-# Check relationships between Feve and other variables
-FEveLM_AGC <- lm(FEve ~ AGC, data = df_var)
-summary(FEveLM_AGC)
+# Check relationships between PCA1_temp and other variables
+PCA1_tempLM_CN <- lm(PCA1_temp ~ C_N, data = df_select_var)
+summary(PCA1_tempLM_CN)
 
 FEveLM_Cnratio <- lm(FEve ~ Cnratio, data = df_var) 
 summary(FEveLM_Cnratio)
@@ -50,61 +70,61 @@ FEveLM_minDHr <- lm(FEve ~ minDHr, data = df_var)
 summary(FEveLM_minDHr)
 
 # Run the complete model
-FEveLM_all <- lm(FEve ~ Cnratio + Pmgkg + PCA1_temp + minDHr + AGC, data = df_var) 
+PCA1_temPLM_all <- lm(PCA1_temp ~ AGCp + C_N + PC2.p, data = df_select_var) 
 
 # Check the adjustment of the complete model
-summary(FEveLM_all)
-coef(FEveLM_all)
-car::vif(FEveLM_all)
+summary(PCA1_temPLM_all)
+coef(PCA1_temPLM_all)
+car::vif(PCA1_temPLM_all)
 
 # Plot results of the complete linear regression model
 par(mfrow = c(2, 2))
-plot(FEveLM_all)
+plot(PCA1_temPLM_all)
 
 # Obtain predicted values and residuals, and some tests
-FEveLM_all_residual <- residuals(FEveLM_all)
-FEveLM_all_preds <- predict(FEveLM_all)
+PCA1_temPLM_all_residual <- residuals(PCA1_temPLM_all)
+PCA1_temPLM_all_preds <- predict(PCA1_temPLM_all)
 
-pearson.test(FEveLM_all_residual)
-lillie.test(FEveLM_all_residual)
-lmtest::bptest(FEveLM_all)
-search <- step(FEveLM_all, ~.^2)
+pearson.test(PCA1_temPLM_all_residual)
+lillie.test(PCA1_temPLM_all_residual)
+lmtest::bptest(PCA1_temPLM_all)
+search <- step(PCA1_temPLM_all, ~.^2)
 
 # Plot of predicted values vs residuals 
 par(mfrow = c(1, 1))
-plot(FEveLM_all_residual ~  FEveLM_all_preds, xlab = "Predicted Values",  ylab = "Residuals")
+plot(PCA1_temPLM_all_residual ~  PCA1_temPLM_all_preds, xlab = "Predicted Values",  ylab = "Residuals")
 
 # Select the best model: stepwise, backwise and both of them with stepAIC function
-FEveLM_all_best_model <- stepAIC(FEveLM_all, direction = c("both", "backward", "forward"))
+PCA1_temPLM_all_best_model <- stepAIC(PCA1_temPLM_all, direction = c("both", "backward", "forward"))
 
 # Test null model of linear model
-FEve_nullLM <- lm(FEve ~ 1, data = df_var)
-summary(FEve_nullLM)
-stepAIC(FEve_nullLM)
+PCA1_temP_nullLM <- lm(PCA1_temp ~ 1, data = df_select_var)
+summary(PCA1_temP_nullLM)
+stepAIC(PCA1_temP_nullLM)
 
 # Run the generalized linear model with FEve ~ Cnratio + PCA1_temp + AGC
-FEveGLM_all <- glm(FEve ~ Cnratio + PCA1_temp + AGC, data = df_var, 
+PCA1_temP_all <- glm(PCA1_temp ~ C_N + AGCp + PC2.p, data = df_select_var, 
                   family = gaussian()) 
-summary (FEveGLM_all)
+summary (PCA1_temP_all)
 
 # Plot results of the complete general linear regression model
 par(mfrow = c(2, 2))
-plot(FEveGLM_all)
+plot(PCA1_temP_all)
 
 # Obtain predicted values and residuals, and some tests
-residuals_FEveglm <- residuals(FEveGLM_all)
-preds_FEveglm <- predict(FEveGLM_all)
+residuals_PCA1_temPglm <- residuals(PCA1_temP_all)
+preds_PCA1_temPglm <- predict(PCA1_temP_all)
 
-pearson.test(residuals_FEveglm)
-lillie.test(residuals_FEveglm)
+pearson.test(residuals_PCA1_temPglm)
+lillie.test(residuals_PCA1_temPglm)
 
 # Plot of predicted values vs residuals 
 par(mfrow = c(1, 1))
-plot(residuals_FEveglm ~ preds_FEveglm, xlab = "Predicted Values",  ylab = "Residuals")
+plot(residuals_PCA1_temPglm ~ preds_PCA1_temPglm, xlab = "Predicted Values",  ylab = "Residuals")
 
 #Select the best model: stepwise, backwise and both of them with glmulti function
-FEve_glmulti <- glmulti(FEve ~ Cnratio + Pmgkg + PCA1_temp + minDHr + AGC , 
-                       data = df_var, level = 1, method = "h", crit = "aic", 
+PCA1_temP_glmulti <- glmulti(PCA1_temp ~ C_N + AGCp + PC2.p, 
+                       data = df_select_var, level = 1, method = "h", crit = "aic", 
                        confsetsize = 100, plotty = F, report = T, 
                        fitfunction = "glm")
 
@@ -115,11 +135,11 @@ FEve_glmulti <- glmulti(FEve ~ Cnratio + Pmgkg + PCA1_temp + minDHr + AGC ,
 # More info: http://www.metafor-project.org/doku.php/tips:model_selection_with_glmulti
 
 # Obtain the best GML models (aic + 2)
-best_models1_glm <- weightable(FEve_glmulti)
+best_models1_glm <- weightable(PCA1_temP_glmulti)
 best_models1_glm <- best_models1_glm[best_models1_glm$aic <= min(best_models1_glm$aic) + 2,]
 
 # Check the best model to obtain beta, SE, and p value
-summary(FEve_glmulti@objects[[1]])
+summary(PCA1_temP_glmulti@objects[[1]])
 
 #######################################################
 ####### MODEL 2: FUNCTIONAL DIVERGENCE ################

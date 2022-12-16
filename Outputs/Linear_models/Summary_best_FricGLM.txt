@@ -1,0 +1,25 @@
+                 model       aic   weights
+1 fric ~ 1 + PCA1_temp -60.74238 0.3129418
+
+Call:
+fitfunc(formula = as.formula(x), data = data)
+
+Deviance Residuals: 
+      Min         1Q     Median         3Q        Max  
+-0.034611  -0.015593  -0.010492   0.007586   0.088192  
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)   
+(Intercept) 0.026236   0.008033   3.266  0.00563 **
+PCA1_temp   0.007467   0.002939   2.541  0.02352 * 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for gaussian family taken to be 0.001032529)
+
+    Null deviance: 0.021122  on 15  degrees of freedom
+Residual deviance: 0.014455  on 14  degrees of freedom
+AIC: -60.742
+
+Number of Fisher Scoring iterations: 2
+

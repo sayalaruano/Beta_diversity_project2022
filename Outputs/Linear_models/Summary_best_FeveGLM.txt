@@ -1,0 +1,25 @@
+             model       aic   weights
+1 feve ~ 1 + PC2.p -28.47344 0.2235007
+
+Call:
+fitfunc(formula = as.formula(x), data = data)
+
+Deviance Residuals: 
+     Min        1Q    Median        3Q       Max  
+-0.19643  -0.05413   0.01383   0.04561   0.13178  
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.75439    0.04326  17.439 6.83e-11 ***
+PC2.p       -0.34559    0.14861  -2.326   0.0356 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for gaussian family taken to be 0.007758735)
+
+    Null deviance: 0.15058  on 15  degrees of freedom
+Residual deviance: 0.10862  on 14  degrees of freedom
+AIC: -28.473
+
+Number of Fisher Scoring iterations: 2
+

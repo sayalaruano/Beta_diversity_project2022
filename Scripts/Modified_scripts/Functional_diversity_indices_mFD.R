@@ -15,8 +15,8 @@ library(ggplot2)
 set.seed(1234)
 
 # Load data
-df_traits_orig <- read.csv("Data/20210810_MeanTraits_FD.csv",stringsAsFactors = TRUE)
-traits_cat <- read.csv("Data/20211108_MeanTraits_CAT.csv",stringsAsFactors = TRUE)
+df_traits_orig <- read.csv("Data/Functional_traits/20210810_MeanTraits_FD.csv",stringsAsFactors = TRUE)
+traits_cat <- read.csv("Data/Functional_traits/20211108_MeanTraits_CAT.csv",stringsAsFactors = TRUE)
 
 #######################################################
 ################ DATASET PREPARATION ##################

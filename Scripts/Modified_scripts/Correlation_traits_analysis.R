@@ -9,6 +9,7 @@ library(Hmisc)
 # Load data
 df_traits_orig <- read.csv("Data/Functional_traits/20210811_MeanTraits.csv")
 df_env_var <- read.csv("Data/Environmental_variables.csv")
+
 # Add plot names as indices and delete column with names
 row.names(df_env_var) <- df_env_var$PLOT
 df_env_var[1] <- NULL
